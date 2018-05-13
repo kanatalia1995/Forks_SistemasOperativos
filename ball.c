@@ -9,6 +9,7 @@
 typedef struct 
 {
 	int state;
+	int gameFlag;
 	key_t key; //memory
 } Ball ;
 
@@ -16,6 +17,7 @@ Ball newBall(int pState, key_t pKeyT)
 {
 	Ball ball;
 	ball.state = pState;
+	ball.gameFlag = 1;
 	ball.key =  pKeyT;
 	return ball;
 }
@@ -23,18 +25,6 @@ Ball newBall(int pState, key_t pKeyT)
 void printBall(Ball* pBall)
 {
 	printf("%s: %d\n", "Ball state", pBall->state);
-}
-
-
-void deleteMemoryBall(key_t pKey)
-{
-	int shmid;
-    if ((shmid = shmget(pKey, sizeof(Ball), 0777 | IPC_CREAT))  < 0)
-    {
-        perror("shmget");
-        exit(1);
-    }
-    shmctl(shmid, IPC_RMID, NULL);
 }
 
 Ball* getMemoryBall(key_t pKey)
@@ -47,6 +37,23 @@ Ball* getMemoryBall(key_t pKey)
     }
     return (Ball*)shmat(shmid, NULL, 0);
 }
+
+void deleteMemoryBall(key_t pKey)
+{
+	Ball* deleted;
+	deleted = getMemoryBall(pKey);
+	shmdt(deleted);
+
+	int shmid;
+    if ((shmid = shmget(pKey, sizeof(Ball), 0777 | IPC_CREAT))  < 0)
+    {
+        perror("shmget");
+        exit(1);
+    }
+    shmctl(shmid, IPC_RMID, NULL);
+}
+
+
 
 
 void waitBall(Ball* resource)
