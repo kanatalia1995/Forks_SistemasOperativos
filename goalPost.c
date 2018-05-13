@@ -31,17 +31,6 @@ void printGoalPost(GoalPost* pGoalPost)
 	printf("%s: %d, %s: %c , %s: %d \n","Id: ", pGoalPost->id, " - Team: ", pGoalPost->team,"- Goals",pGoalPost->goals);
 }
 
-void deleteMemoryGoalPost(key_t pKey)
-{
-	int shmid;
-    if ((shmid = shmget(pKey, sizeof(GoalPost), 0777 | IPC_CREAT))  < 0)
-    {
-        perror("shmget");
-        exit(1);
-    }
-    shmctl(shmid, IPC_RMID, NULL);
-}
-
 GoalPost* getMemoryGoalPost(key_t pKey)
 {
 	int shmid;
@@ -53,11 +42,33 @@ GoalPost* getMemoryGoalPost(key_t pKey)
     return (GoalPost*)shmat(shmid, NULL, 0);
 }
 
-
-void waitGoalPost(GoalPost* resource)
+void deleteMemoryGoalPost(key_t pKey)
 {
-    while(resource->state <= 0){};//wait
-    (resource->state)--;
+	GoalPost* deleted = getMemoryGoalPost(pKey);
+	shmdt(deleted);
+
+	int shmid;
+    if ((shmid = shmget(pKey, sizeof(GoalPost), 0777 | IPC_CREAT))  < 0)
+    {
+        perror("shmget");
+        exit(1);
+    }
+    shmctl(shmid, IPC_RMID, NULL);
+}
+
+
+
+
+int getGoalPost(GoalPost* resource)
+{
+    if (resource->state <= 0) 
+    {
+    	return 0 ;//wait
+    }else {
+    	(resource->state)--;
+    	return 1; 
+    }
+    
 }
 
 void signalGoalPost(GoalPost* resource)
