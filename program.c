@@ -53,7 +53,7 @@ Player *initTeam(char pName, key_t pTeamKey, key_t pOtherTeam){
             while(getMemoryBall(key_Ball)->gameFlag){ // If the game is over this flag doesn't allow to continue.
                 waitRandom(getMemoryRandom(key_Random));
                 ran =  getRandom(5,20);
-                printf("Random numeber  %d\n" , ran);
+                printf("Random number  %d\n" , ran);
                 signalRandom(getMemoryRandom(key_Random));
                 sleep(ran);
                 waitBall(getMemoryBall(key_Ball));
@@ -114,6 +114,8 @@ void killAllProcess(Player* team){
 int main()
 {
     //finishAllMemories();
+    srand(time(NULL));                                  // Cambiamos la semilla de la función rand() cada vez que iniciamos el programa.
+
     GoalPost goalPostA = newGoalPost(1,'A',1,key_TeamA);// Init available
     createMemoryGoalPost(goalPostA);
     printf("PostGoalA has been created: ");
