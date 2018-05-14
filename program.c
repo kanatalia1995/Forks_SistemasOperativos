@@ -11,13 +11,13 @@
 #include "resource.c"
 
 
-key_t key_TeamA = 6000; 
-key_t key_TeamB = 6001; 
+const key_t key_TeamA = 6000; 
+const key_t key_TeamB = 6001; 
 key_t key_Ball = 6003; 
 key_t key_Random = 6004; 
 
 #define playerAmount 5
-#define TIME 5
+#define TIME 1
 
 #define RESET     "\x1B[0m"
 #define BOLD      "\x1B[1m"
@@ -71,12 +71,20 @@ void PrintNewPlayer(int ppid, Player pPlayer)
 
 
 Player *initTeam(char pName, key_t pTeamKey, key_t pOtherTeam){
-    static Player team[playerAmount];
-    for(int i =0;i<playerAmount;i++){
+    static Player team[playerAmount*2];
+    int i = 0;
+    int newPlayerAmount = playerAmount;
+    if (pTeamKey == key_TeamB){
+    	i = i + playerAmount;
+    	newPlayerAmount = playerAmount*2;
+    }
+    for(i ; i<newPlayerAmount ; i++){
         pid_t  pid;
         pid = fork();
         if ( pid == 0) {
-            amI=  newPlayer(getpid(),i+1,pName,1,pTeamKey);
+        	int number = i + 1;
+        	if (pTeamKey == key_TeamB) number -= 5;
+            amI=  newPlayer(getpid(), number, pName, 1, pTeamKey);
             int ran;
             // printf("New player registered ppid %d \n",getppid());
             // printPlayer(amI);
@@ -138,7 +146,17 @@ void finishAllMemories(){
 }
 
 void killAllProcess(Player* team){
-    for(int i = 0; i<5; i++){
+	// int i = 0;
+	// int newPlayerAmount = playerAmount;
+ //    if (team.teamKey == key_TeamB){
+ //    	i = i + playerAmount;
+ //    	newPlayerAmount = playerAmount*2;
+ //    }
+ //    for(int i = 0 ; i<newPlayerAmount ; i++){
+ //        printf("%s  × %s playerId %d\n", FG_RED, RESET, team[i].id);
+ //        kill(team[i].id,SIGTERM);
+ //    }
+	   for(int i = 0 ; i<playerAmount*2 ; i++){
         printf("%s  × %s playerId %d\n", FG_RED, RESET, team[i].id);
         kill(team[i].id,SIGTERM);
     }
@@ -173,8 +191,8 @@ int main()
     
     createMemoryRandom(1,key_Random);
     
-    Player* teamA = initTeam('A',key_TeamA,key_TeamB);
-    Player* teamB = initTeam('B',key_TeamB,key_TeamA);
+    Player* teamA = initTeam('A', key_TeamA, key_TeamB);
+    Player* teamB = initTeam('B', key_TeamB, key_TeamA);
 
     int flag = 1;
     struct tm* time ;
@@ -192,7 +210,7 @@ int main()
     //finishing child process
     printf("\nFinishing all processes: \n");
     killAllProcess(teamA);
-    killAllProcess(teamB);
+    // killAllProcess(teamB);
 
     //Ball* ballState = getMemoryBall(key_Ball);
     //ballState->gameFlag = 0; 
