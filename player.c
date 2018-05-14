@@ -22,7 +22,7 @@ Player newPlayer(int pId,int pName ,char pTeam,int pState,key_t pTeamKey)
 
 void printPlayer(Player pPlayer)
 {
-	printf("%s: %d,%s : %d ,%s: %c\n","Id: ", pPlayer.id,"- Player",pPlayer.name ," - Team: ", pPlayer.team);
+	printf("%s: %d,%s : %d ,%s: %c\n","Id", pPlayer.id," | Player",pPlayer.name ," | Team", pPlayer.team);
 }
 
 
