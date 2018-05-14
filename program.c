@@ -17,11 +17,12 @@ key_t key_Ball = 6003;
 key_t key_Random = 6004; 
 
 #define playerAmount 5
-#define TIME 1
+#define TIME 5
 
 #define RESET     "\x1B[0m"
 #define BOLD      "\x1B[1m"
 #define FG_RED    "\x1B[31m"
+#define FG_GREEN  "\x1B[32m"
 #define FG_YELLOW "\x1B[33m"
 #define FG_WHITE  "\x1B[37m"
 #define BG_BLACK  "\x1B[40m"
@@ -45,11 +46,11 @@ void printResult(){
     GoalPost* teamA =  getMemoryGoalPost(key_TeamA);
     GoalPost* teamB =  getMemoryGoalPost(key_TeamB);
 	printf("%s", FG_YELLOW);	// Active yellow color
-    printf("***********************\n");
-    printf("******Score table******\n");
-    printf("│  Team A   ║  Team B │\n");
-    printf("     %d           %d    \n", teamB->goals,teamA->goals);
-    printf("└───────────┴─────────┘\n");
+    printf("************************\n");
+    printf("******Score table*******\n");
+    printf("│  Team A   ║  Team B  │\n");
+    printf("     %d           %d     \n", teamB->goals,teamA->goals);
+    printf("└───────────┴──────────┘\n");
     printf("%s", RESET);	// Desactive yellow color
     puts("");
 }
@@ -62,18 +63,28 @@ void PrintFinalScore(){
     printf("%s", RESET);	// Desactive yellow color and BOLD
 }
 
+void PrintNewPlayer(int ppid, Player pPlayer)
+{
+	printf("%s%s  +  %sppid : %d | ", BOLD, FG_GREEN, RESET, ppid);
+	printPlayer(pPlayer);
+}
+
+
 Player *initTeam(char pName, key_t pTeamKey, key_t pOtherTeam){
     static Player team[playerAmount];
     for(int i =0;i<playerAmount;i++){
         pid_t  pid;
         pid = fork();
         if ( pid == 0) {
-            amI=  newPlayer(getpid(),i,pName,1,pTeamKey);
+            amI=  newPlayer(getpid(),i+1,pName,1,pTeamKey);
             int ran;
-            printf("New player registered ppid %d \n",getppid());
-            printPlayer(amI);
+            // printf("New player registered ppid %d \n",getppid());
+            // printPlayer(amI);
+            PrintNewPlayer(getppid(), amI);
             while(getMemoryBall(key_Ball)->gameFlag){ // If the game is over this flag doesn't allow to continue.
                 waitRandom(getMemoryRandom(key_Random));
+            	sleep(1);
+            	srand(time(0)+i*getpid());
                 ran =  getRandom(5,20);
                 printf("Random number %d\n" , ran);
                 signalRandom(getMemoryRandom(key_Random));
@@ -83,10 +94,9 @@ Player *initTeam(char pName, key_t pTeamKey, key_t pOtherTeam){
                     if(getGoalPost(getMemoryGoalPost(amI.teamKey)) == 1){
                         GoalPost* goal = getMemoryGoalPost(pOtherTeam);
                         goal->goals = goal->goals+1;
-                        printf("\nGooaaal of the Team : %c, Player: %d ⚽ \n",amI.team, amI.name);
+                        printf("\nGooaaal of the Team %c, Player %d ⚽ \n",amI.team, amI.name);
                         puts("");
                         printResult();
-
                         signalGoalPost(getMemoryGoalPost(pOtherTeam));
                         break;
                     }else{
@@ -94,9 +104,10 @@ Player *initTeam(char pName, key_t pTeamKey, key_t pOtherTeam){
                     } 
                 }
                 signalBall(getMemoryBall(key_Ball));
-                printf("%s%s Player: %d Team : %c%s\n", BG_BLACK, "Ball was returned", amI.name,amI.team, RESET);
+                printf("%s%s Player %d, Team %c%s\n", BG_BLACK, "Ball was returned", amI.name,amI.team, RESET);
                 if(getGoalPost(getMemoryGoalPost(amI.team)) == 1){
                     waitRandom(getMemoryRandom(key_Random));
+                    srand(time(0)+i*i);
                     ran =  getRandom(2,5);
                     signalRandom(getMemoryRandom(key_Random));
                     sleep(ran);
@@ -142,12 +153,12 @@ int main()
 
     GoalPost goalPostA = newGoalPost(1,'A',1,key_TeamA);// Init available
     createMemoryGoalPost(goalPostA);
-    printf("PostGoalA has been created: ");
+    printf("PostGoal A has been created: ");
     printGoalPost(&goalPostA);
 
     GoalPost goalPostB = newGoalPost(2,'B',1,key_TeamB);
     createMemoryGoalPost(goalPostB);
-    printf("PostGoalB has been created: ");
+    printf("PostGoal B has been created: ");
     printGoalPost(&goalPostB);
     puts("");
 
@@ -155,7 +166,11 @@ int main()
     createMemoryBall(ball);
     printf("The Ball is playing!\n");
     printBall(&ball);
+
     puts("");
+    printf("All new players registered: ");
+    puts("");
+    
     createMemoryRandom(1,key_Random);
     
     Player* teamA = initTeam('A',key_TeamA,key_TeamB);
@@ -181,8 +196,6 @@ int main()
 
     //Ball* ballState = getMemoryBall(key_Ball);
     //ballState->gameFlag = 0; 
-    //Final result
-    // printf("       ***********************");
 
    	PrintFinalScore();
     finishAllMemories();

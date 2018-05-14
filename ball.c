@@ -74,7 +74,6 @@ void createMemoryBall(Ball ball){
 	    perror("shmget");
 	    exit(1);
 	}
-
 	Ball* ballPointer = (Ball*)shmat(shmid, NULL, 0);
 	*ballPointer = ball;
 }
