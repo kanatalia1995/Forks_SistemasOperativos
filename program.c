@@ -11,13 +11,13 @@
 #include "resource.c"
 
 
-const key_t key_TeamA = 6000; 
-const key_t key_TeamB = 6001; 
-key_t key_Ball = 6003; 
+key_t key_TeamA  = 6000; 
+key_t key_TeamB  = 6001; 
+key_t key_Ball   = 6003; 
 key_t key_Random = 6004; 
 
 #define playerAmount 5
-#define TIME 1
+#define TIME 5
 
 #define RESET     "\x1B[0m"
 #define BOLD      "\x1B[1m"
@@ -56,8 +56,8 @@ void printResult(){
 }
 
 void PrintFinalScore(){
-	printf("%s", BOLD);	// Active BOLD
-	printf("%s", FG_YELLOW);	// Active yellow color 
+	printf("%s", BOLD);		// Active BOLD
+	printf("%s", FG_YELLOW);// Active yellow color 
     printf("\n%s\n","----- Final score -----");
     printResult();
     printf("%s", RESET);	// Desactive yellow color and BOLD
@@ -86,8 +86,6 @@ Player *initTeam(char pName, key_t pTeamKey, key_t pOtherTeam){
         	if (pTeamKey == key_TeamB) number -= 5;
             amI=  newPlayer(getpid(), number, pName, 1, pTeamKey);
             int ran;
-            // printf("New player registered ppid %d \n",getppid());
-            // printPlayer(amI);
             PrintNewPlayer(getppid(), amI);
             while(getMemoryBall(key_Ball)->gameFlag){ // If the game is over this flag doesn't allow to continue.
                 waitRandom(getMemoryRandom(key_Random));
@@ -146,17 +144,7 @@ void finishAllMemories(){
 }
 
 void killAllProcess(Player* team){
-	// int i = 0;
-	// int newPlayerAmount = playerAmount;
- //    if (team.teamKey == key_TeamB){
- //    	i = i + playerAmount;
- //    	newPlayerAmount = playerAmount*2;
- //    }
- //    for(int i = 0 ; i<newPlayerAmount ; i++){
- //        printf("%s  × %s playerId %d\n", FG_RED, RESET, team[i].id);
- //        kill(team[i].id,SIGTERM);
- //    }
-	   for(int i = 0 ; i<playerAmount*2 ; i++){
+	for(int i = 0 ; i<playerAmount*2 ; i++){
         printf("%s  × %s playerId %d\n", FG_RED, RESET, team[i].id);
         kill(team[i].id,SIGTERM);
     }
@@ -165,7 +153,7 @@ void killAllProcess(Player* team){
 
 int main()
 {
-    finishAllMemories();
+    // finishAllMemories();
     srand(time(NULL));                                  // Cambiamos la semilla de la función rand() cada vez que iniciamos el programa.
     puts("");
 
