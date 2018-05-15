@@ -6,6 +6,9 @@
 #include <sys/stat.h>
 #include <assert.h>
 
+#define RESET     "\x1B[0m"
+#define BOLD      "\x1B[1m"
+
 typedef struct 
 {
 	int id;
@@ -28,7 +31,10 @@ GoalPost newGoalPost(int pId, char pTeam,int pState,key_t pKey)
 
 void printGoalPost(GoalPost* pGoalPost)
 {
-	printf("%s: %d, %s: %c , %s: %d \n","Id: ", pGoalPost->id, " - Team: ", pGoalPost->team,"- Goals",pGoalPost->goals);
+	printf("%s", BOLD);	// Active BOLD
+	printf("%s: %d, %s: %c , %s: %d \n","Id ", pGoalPost->id, "| Team: ", pGoalPost->team,"| Goals",pGoalPost->goals);
+    printf("%s", RESET);	// Desactive yellow color and BOLD
+
 }
 
 GoalPost* getMemoryGoalPost(key_t pKey)
